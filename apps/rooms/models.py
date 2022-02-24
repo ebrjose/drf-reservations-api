@@ -19,4 +19,4 @@ class Room(BaseModel):
         verbose_name_plural = 'Rooms'
 
     def __str__(self):
-        return f"{self.id} | {self.type} | { 'Available' if self.available else 'Occupied' } | {self.description}"
+        return f"{self.id} | {self.type} |  {self.description}"

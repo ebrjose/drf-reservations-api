@@ -30,5 +30,16 @@ class TestsProcessPayments(TestPaymentsSetup):
         response = self.client.post(self.process_url, process_data)
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
+    def test_paid_reservations_cannot_be_processed_again(self):
+        reservation = self.reservation_factory(status='PAID')
+        total_fees = FeesCalculatorService(reservation).total_fees()
+        process_data = {
+            'reservation': reservation.id,
+            'payment_method': 'CREDIT_CARD',
+            'total': total_fees.total
+        }
+        response = self.client.post(self.process_url, process_data)
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
 
 

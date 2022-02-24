@@ -25,9 +25,14 @@ class ProcessPaymentSerializer(serializers.ModelSerializer):
         reservation = data['reservation']
         total_fees = FeesCalculatorService(reservation).total_fees()
 
+        if reservation.status != 'PENDING':
+            raise serializers.ValidationError(
+                {'reservation': f"""The reservation has been {reservation.status}, the payment cannot be processed."""}
+            )
+
         if float(data['total']) != float(total_fees.total):
             raise serializers.ValidationError(
-                {'total': f"""'Total amount' must be equal to '{total_fees.total}'"""}
+                {'total': f"""'Total amount must be equal to '{total_fees.total}', the payment cannot be processed."""}
             )
 
         return data

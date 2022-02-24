@@ -6,6 +6,9 @@ from apps.rooms.api.serializers import RoomSerializer
 from apps.users.api.serializers import UserRegisterSerializer
 from datetime import  date
 
+from apps.payments.services.fees_calculator_service import FeesCalculatorService
+
+
 class ReservationSerializer(serializers.ModelSerializer):
     class Meta:
         model = Reservation
@@ -40,6 +43,24 @@ class ReservationSerializer(serializers.ModelSerializer):
 
         return reservation
 
+    def to_representation(self, instance):
+        fees = FeesCalculatorService(instance).total_fees()
+        return {
+            'id': instance.id,
+            'uuid': instance.uuid,
+            'reservation_date': instance.reservation_date,
+            'checkin_date': instance.checkin_date,
+            'checkout_date': instance.checkout_date,
+            'guest': instance.guest.__str__(),
+            'room': instance.room.__str__(),
+            'price_per_night': instance.room.price,
+            'total_nights': instance.get_total_nights(),
+            'room_charge': fees.room_charge,
+            'taxes': fees.taxes,
+            'total': fees.total,
+            'status': instance.status,
+        }
+
 
 class ReservationListSerializer(serializers.ModelSerializer):
     class Meta:
@@ -54,7 +75,8 @@ class ReservationListSerializer(serializers.ModelSerializer):
             'checkout_date': instance.checkout_date,
             'total_nights': instance.get_total_nights(),
             'guest': instance.guest.__str__(),
-            'room': instance.room.__str__()
+            'room': instance.room.__str__(),
+            'status': instance.status,
         }
 
 class ReservationViewSerializer(serializers.ModelSerializer):
@@ -62,7 +84,25 @@ class ReservationViewSerializer(serializers.ModelSerializer):
     room = RoomSerializer()
     class Meta:
         model = Reservation
-        fields = '__all__'
+        # fields = '__all__'
+
+    def to_representation(self, instance):
+        fees = FeesCalculatorService(instance).total_fees()
+        return {
+            'id': instance.id,
+            'uuid': instance.uuid,
+            'reservation_date': instance.reservation_date,
+            'checkin_date': instance.checkin_date,
+            'checkout_date': instance.checkout_date,
+            'guest': instance.guest.__str__(),
+            'room': instance.room.__str__(),
+            'price_per_night': instance.room.price,
+            'total_nights': instance.get_total_nights(),
+            'room_charge': fees.room_charge,
+            'taxes': fees.taxes,
+            'total': fees.total,
+            'status': instance.status,
+        }
 
 class ReservationStatusSerializer(ReservationViewSerializer):
     class Meta:
