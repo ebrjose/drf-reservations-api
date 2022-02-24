@@ -23,7 +23,7 @@ $ pip install -r requirements.txt
 # Ejecutamos las migraciones
 $ python manage.py migrate
 
-# Ejecutamos el servidor
+# Iniciamos el servidor
 $ python manage.py runserver
 
 ```
@@ -47,17 +47,17 @@ curl --location --request POST 'http://127.0.0.1:8000/api/rooms/' \
 --data-raw '{
     "type": "SIMPLE",
     "description": "Room with SIMPLE bed",
-    "price": "10"
+    "price": 150
 }'
 ```
 
 **Response:**
 ```json
 {
-    "id": 2,
-    "type": "SIMPLE",
-    "description": "Room with SIMPLE bed",
-    "price": 10,
+    "id": 1,
+    "type": "SUITE",
+    "description": "Room Royal SUITE",
+    "price": 150,
     "available": true
 }
 ```
@@ -83,7 +83,7 @@ curl --location --request POST 'http://127.0.0.1:8000/api/users/register/' \
 **Response:**
 ```json
 {
-    "id": 2,
+    "id": 1,
     "username": "ebrjose",
     "email": "ebrjose@gmail.com",
     "name": "Eber",
@@ -109,31 +109,61 @@ curl --location --request POST 'http://127.0.0.1:8000/api/reservations/make/' \
 --data-raw '{
     "guest": "1",
     "room": "1",
-    "checkin_date": "2022-05-23",
-    "checkout_date": "2021-05-30"
+    "checkin_date": "2021-05-23",
+    "checkout_date": "2021-05-24"
 }'
 ```
 
 **Response:**
 ```json
 {
-    "id": 6,
-    "uuid": "gpHE2i7Dv2rpBEqmvZJeCf",
-    "reservation_date": "2022-02-24T06:03:23.597316Z",
-    "checkin_date": "2022-05-25",
-    "checkout_date": "2022-05-30",
+    "id": 10,
+    "uuid": "iAQLn9zwSHetduTZBcwrjH",
+    "reservation_date": "2022-02-24T13:21:36.278853Z",
+    "checkin_date": "2022-05-23",
+    "checkout_date": "2022-05-24",
     "guest": "Eber Coaquira",
-    "room": "2 | SIMPLE |  Habitación simple",
-    "price_per_night": 50,
-    "total_nights": 5,
-    "room_charge": 250,
-    "taxes": 32.5,
-    "total": 282.5,
+    "room": "1 | SUITE |  Room Royal SUITE",
+    "price_per_night": 150,
+    "total_nights": 1,
+    "room_charge": 150,
+    "taxes": 19.5,
+    "total": 169.5,
     "status": "PENDING"
 }
 ```
 
-## Paso 4 : Procesar el pago de una reserva
+
+## Paso 4 : Ver una reservación
+> Los pagos se procesan en el **endpoint**.
+>
+> **GET** |  http://127.0.0.1:8000/api/payments/:id/
+>
+**Request:**
+``` bash
+curl --location -g --request GET 'http://127.0.0.1:8000/api/reservations/1'
+```
+
+**Response:**
+``` bash
+{
+    "id": 1,
+    "uuid": "k23wuoFpGyKxYK65HQnk7U",
+    "reservation_date": "2022-02-24T13:16:52.321508Z",
+    "checkin_date": "2022-05-25",
+    "checkout_date": "2022-05-30",
+    "guest": "Eber Coaquira",
+    "room": "1 | SUITE |  Room Royal SUITE",
+    "price_per_night": 150,
+    "total_nights": 5,
+    "room_charge": 750,
+    "taxes": 97.5,
+    "total": 847.5,
+    "status": "PENDING"
+}
+```
+
+## Paso 5 : Procesar el pago de una reserva
 
 > Los pagos se procesan en el **endpoint**.
 >
@@ -143,52 +173,49 @@ curl --location --request POST 'http://127.0.0.1:8000/api/reservations/make/' \
 * Cuando el pago es procesado el estado de la reservacion cambia a **PAID**
 * Solo se pueden pagar las reservas con estado PENDING
 * El estado de la habitación cambia a disponible
+*  El metodo de pago puede ser: payment_method = CREDIT_CARD | CASH | PAYPAL
 
 **Request:**
 ``` bash
-
-# El metodo de pago puede ser
-# payment_method = CREDIT_CARD | CASH | PAYPAL
-
 curl --location --request POST 'http://127.0.0.1:8000/api/payments/proccess/' \
 --header 'Content-Type: application/json' \
 --data-raw '{
     "reservation": "1",
     "payment_method": "CREDIT_CARD",
-    "total": 113.0
+    "total": 169.5
 }'
 ```
 
 **Response:**
 ```json
 {
-    "id": 2,
+    "id": 1,
     "guest": {
         "id": 1,
-        "username": "ebrjose",
-        "email": "ebrjose@gmail.com",
+        "username": "ebrjose10",
+        "email": "ebrjose10@gmail.com",
         "name": "Eber",
         "last_name": "Coaquira"
     },
     "reservation": {
         "id": 1,
-        "uuid": "j2D7jheYvwioksJRGTFrmu",
-        "reservation_date": "2022-02-24T04:39:18.042003Z",
-        "checkin_date": "2022-04-23",
-        "checkout_date": "2022-04-25",
-        "total_nights": 2,
+        "uuid": "iAQLn9zwSHetduTZBcwrjH",
+        "reservation_date": "2022-02-24T13:21:36.278853Z",
+        "checkin_date": "2022-05-23",
+        "checkout_date": "2022-05-24",
+        "total_nights": 1,
         "guest": "Eber Coaquira",
-        "room": "1 | SIMPLE | Available | Habitación simple"
+        "room": "1 | SUITE |  Room Royal SUITE",
+        "status": "PAID"
     },
-    "uuid": "iHfhFdA6JV5F4Qhn9nFheH",
+    "uuid": "QRFP9JjWihh38zR2LS5ERD",
     "payment_method": "CREDIT_CARD",
-    "taxes": "13.00",
-    "room_charge": "100.00",
-    "total": "113.00",
+    "taxes": "19.50",
+    "room_charge": "150.00",
+    "total": "169.50",
     "payment_date": "2022-02-24"
 }
 ```
-
 
 ## Opcional : Cancelar una reservación
 

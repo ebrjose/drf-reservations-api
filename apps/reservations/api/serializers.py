@@ -107,4 +107,12 @@ class ReservationViewSerializer(serializers.ModelSerializer):
 class ReservationStatusSerializer(ReservationViewSerializer):
     class Meta:
         model = Reservation
-        fields = ('id', 'status', 'guest')
+        # fields = ('id', 'status')
+        fields = '__all__'
+
+    def validate(self, data):
+        if self.instance.status != 'PENDING':
+            raise serializers.ValidationError(
+                {'status': f"""The reservation status is already in {self.instance.status} status, cannot be CANCELLED"""}
+            )
+        return data

@@ -49,10 +49,20 @@ class ReservationViewSet(viewsets.GenericViewSet):
         }, status=status.HTTP_400_BAD_REQUEST)
 
     @action(detail=True, methods=['patch'], url_path='cancel')
-    def cancel(self, request, pk=None):
+    def cancel(self, request, pk=None, **kwargs):
         reservation = self.get_object(pk)
-        reservation.status = 'CANCELLED'
-        reservation.save()
+        data = {status: 'CANCELLED'}
+        reservation_serializer = ReservationStatusSerializer(reservation,data=data,partial=True)
+        if reservation_serializer.is_valid():
+            reservation.status = 'CANCELLED'
+            reservation.save()
 
-        reservation_serializer = ReservationStatusSerializer(reservation)
-        return Response(reservation_serializer.data, status=status.HTTP_200_OK)
+            room = reservation.room
+            room.available = True
+            room.save()
+
+            return Response(reservation_serializer.data, status=status.HTTP_200_OK)
+
+        return Response({
+            'errors': reservation_serializer.errors
+        }, status=status.HTTP_400_BAD_REQUEST)
