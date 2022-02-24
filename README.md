@@ -153,7 +153,7 @@ curl --location --request POST 'http://127.0.0.1:8000/api/reservations/make/' \
 curl --location --request POST 'http://127.0.0.1:8000/api/payments/proccess/' \
 --header 'Content-Type: application/json' \
 --data-raw '{
-    "booking": "1",
+    "reservation": "1",
     "payment_method": "CREDIT_CARD",
     "total": 113.0
 }'
@@ -165,8 +165,8 @@ curl --location --request POST 'http://127.0.0.1:8000/api/payments/proccess/' \
     "id": 2,
     "guest": {
         "id": 1,
-        "username": "ebrjose10",
-        "email": "ebrjose10@gmail.com",
+        "username": "ebrjose",
+        "email": "ebrjose@gmail.com",
         "name": "Eber",
         "last_name": "Coaquira"
     },
