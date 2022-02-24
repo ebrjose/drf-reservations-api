@@ -24,24 +24,25 @@ class ReservationViewSet(viewsets.GenericViewSet):
 
     def get_queryset(self, pk=None):
         if pk is None:
-            return self.get_serializer().Meta.model.objects.filter(state=True)
-        return self.get_serializer().Meta.model.objects.filter(id=pk, state=True).first()
+            return self.get_serializer().Meta.model.objects.filter(active=True)
+        return self.get_serializer().Meta.model.objects.filter(id=pk, active=True).first()
 
     def list(self, request):
-        bookings = self.get_queryset()
-        booking_serializer = self.list_serializer_class(bookings, many=True)
-        return Response(booking_serializer.data, status=status.HTTP_200_OK)
+        reservations = self.get_queryset()
+        reservation_serializer = self.list_serializer_class(reservations, many=True)
+        return Response(reservation_serializer.data, status=status.HTTP_200_OK)
 
     def retrieve(self, request, pk=None):
-        booking = self.get_object(pk)
-        booking_serializer = self.view_serializer_class(booking)
-        return Response(booking_serializer.data)
+        reservation = self.get_object(pk)
+        reservation_serializer = self.view_serializer_class(reservation)
+        return Response(reservation_serializer.data)
 
-    @action(detail=False, methods=['post'], url_path='order')
+    @action(detail=False, methods=['post'], url_path='make')
     def book(self, request):
         reservation_serializer = self.serializer_class(data=request.data)
         if reservation_serializer.is_valid():
             reservation_serializer.save()
+
             return Response(reservation_serializer.data, status=status.HTTP_201_CREATED)
         return Response({
             'errors': reservation_serializer.errors
@@ -54,4 +55,4 @@ class ReservationViewSet(viewsets.GenericViewSet):
         reservation.save()
 
         reservation_serializer = ReservationStatusSerializer(reservation)
-        return Response(reservation_serializer.data)
+        return Response(reservation_serializer.data, status=status.HTTP_200_OK)

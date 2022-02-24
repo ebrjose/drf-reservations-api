@@ -8,7 +8,7 @@ from apps.reservations.models import Reservation
 from apps.payments.models import Payment
 
 from apps.payments.api.serializers import (
-    ProccessPaymentSerializer,
+    ProcessPaymentSerializer,
     ViewPaymentSerializer,
     PaymentListSerializer
 )
@@ -25,8 +25,8 @@ class PaymentsViewSet(viewsets.GenericViewSet):
 
     def get_queryset(self, pk=None):
         if pk is None:
-            return self.get_serializer().Meta.model.objects.filter(state=True)
-        return self.get_serializer().Meta.model.objects.filter(id=pk, state=True).first()
+            return self.get_serializer().Meta.model.objects.filter(active=True)
+        return self.get_serializer().Meta.model.objects.filter(id=pk, active=True).first()
 
     def list(self, request):
         payments = self.get_queryset()
@@ -38,17 +38,17 @@ class PaymentsViewSet(viewsets.GenericViewSet):
         view_serializer = self.view_serializer_class(payment)
         return Response(view_serializer.data)
 
-    @action(detail=False, methods=['post'], url_path='proccess-payment')
+    @action(detail=False, methods=['post'], url_path='process')
     def process_payment(self, request):
-        proccess_serializer = ProccessPaymentSerializer(data=request.data)
+        process_serializer = ProcessPaymentSerializer(data=request.data)
 
-        if proccess_serializer.is_valid():
-            proccess_serializer.save()
+        if process_serializer.is_valid():
+            process_serializer.save()
             view_serializer = self.view_serializer_class(
-                self.get_object(pk=proccess_serializer.data['id'])
+                self.get_object(pk=process_serializer.data['id'])
             )
             return Response(view_serializer.data, status=status.HTTP_201_CREATED)
 
         return Response({
-            'errors': proccess_serializer.errors
+            'errors': process_serializer.errors
         }, status=status.HTTP_400_BAD_REQUEST)

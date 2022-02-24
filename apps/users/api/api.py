@@ -38,7 +38,8 @@ class UserViewSet(viewsets.GenericViewSet):
         if user_serializer.is_valid():
             user_serializer.save()
             return Response({
-                'message': 'Usuario registrado correctamente.'
+                'message': 'Usuario registrado correctamente.',
+                'user': '111',
             }, status=status.HTTP_201_CREATED)
         return Response({
             'message': 'Hay errores en el registro',
@@ -73,7 +74,7 @@ class UserViewSet(viewsets.GenericViewSet):
             'message': 'No existe el usuario que desea eliminar'
         }, status=status.HTTP_404_NOT_FOUND)
 
-    @action(detail=True, methods=['patch'], url_path='set-password')
+    @action(detail=True, methods=['patch'], url_path='set-password', url_name='set_password')
     def set_password(self, request, pk=None):
         user = self.get_object(pk)
         password_serializer = PasswordSerializer(data=request.data)
@@ -88,14 +89,12 @@ class UserViewSet(viewsets.GenericViewSet):
             'errors': password_serializer.errors
         }, status=status.HTTP_400_BAD_REQUEST)
 
-    @action(detail=False, methods=['post'], url_path='register')
+    @action(detail=False, methods=['post'], url_path='register', url_name='register')
     def register(self, request):
         user_serializer = self.register_serializer_class(data=request.data)
         if user_serializer.is_valid():
             user_serializer.save()
-            return Response({
-                'message': 'Usuario registrado correctamente.'
-            }, status=status.HTTP_201_CREATED)
+            return Response(user_serializer.data, status=status.HTTP_201_CREATED)
         return Response({
             'message': 'Hay errores en el registro',
             'errors': user_serializer.errors

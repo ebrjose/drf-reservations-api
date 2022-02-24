@@ -10,6 +10,7 @@ django-simple-history==3.0.0
 djangorestframework==3.12.4
 djangorestframework-simplejwt==5.0.0
 drf-yasg==1.20.0
+factory-boy==3.2.1
 Faker==9.8.1
 idna==3.3
 inflection==0.5.1
